@@ -56,10 +56,41 @@ func (s *SupplyChainContract) InitLedger(ctx contractapi.TransactionContextInter
 	return nil
 }
 
-// // CreateProduct creates a new product in the ledger
-// func (s *SupplyChainContract) CreateProduct(ctx contractapi.TransactionContextInterface, id, name, owner, description, category string) error {
-// 	// Write your implementation here
-// }
+// CreateProduct creates a new product in the ledger
+func (s *SupplyChainContract) CreateProduct(ctx contractapi.TransactionContextInterface, id, name, owner, description, category string) error {
+	// Write your implementation here
+	//Checking if it exists already
+
+	productExists, err := s.ProductExists(ctx,id)
+
+	if(err != nil){
+		return fmt.Errorf("failed to check if product exists: %v", err)
+	}
+
+	if(productExists){
+		return fmt.Errorf("the product %s already exists", id)
+	}
+
+	//If we reach here, the product does not exist
+
+	timestamp, err := s.getTimestamp(ctx)
+	if(err != nil){
+		return err
+	}
+
+	newProduct := Product{
+		ID: id,
+		Name: name,
+		Status: "Manufactured",
+		Owner: owner,
+		CreatedAt: timestamp,
+		UpdatedAt: timestamp,
+		Description: description,
+		Category: category,
+	}
+
+	return s.putProduct(ctx, &newProduct)
+}
 
 // // UpdateProduct allows updating a product's status, owner, description, and category
 // func (s *SupplyChainContract) UpdateProduct(ctx contractapi.TransactionContextInterface, id string, newStatus string, newOwner string, newDescription string, newCategory string) error {
